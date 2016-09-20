@@ -1,0 +1,104 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="content-behavior.html">
+
+<style is="custom-style">
+  .mce-panel .mce-menu-item:hover, .mce-panel .mce-menu-item.mce-selected, .mce-panel .mce-menu-item:focus {
+    background-color: var(--rich-editor-color, #2196F3);
+  }
+
+  .mce-menu-item-normal.mce-active {
+    background-color: var(--rich-editor-color, #2196F3);
+  }
+</style>
+
+<dom-module id="content-editor">
+  <style>
+    :host {
+      display: block;
+    }
+
+    :host rich-editor {
+      --rich-editor-color: #2196F3;
+
+    }
+    :host.hidden {
+      opacity:0;
+      transition: all 0.25s linear;
+    }
+  </style>
+  <template>
+    <rich-editor data-id="[[dataId]]" class="no-padding hide-icon" disable-onload="true" id="richEditor">
+      <content></content>
+    </rich-editor>
+  </template>
+</dom-module>
+<script>
+
+  Polymer({
+
+    is: 'content-editor',
+
+    behaviors: [Elliptical.ComponentBehavior,Elliptical.ContentBehavior],
+
+    properties: {
+      _richEditor:{
+        type:Object,
+        value:null
+      }
+    },
+
+    listeners: {},
+
+    ready: function () {
+      this._contentReady();
+      this._setEditorReference();
+      if(this._isEditMode) this._setEditor();
+
+    },
+
+    _events:function(){
+
+    },
+
+    _onContentComponentShow:function(){
+      this._enableEditor();
+    },
+
+    _onContentComponentHide:function(){
+      this._disableEditor();
+    },
+
+    _onContentComponentSet:function(content){
+      var editor = this._editor;
+      if(content) editor.setContent(content);
+      this.classList.remove('hidden');
+    },
+
+    _setEditor: function () {
+      var editor = this._editor;
+      editor.enable();
+    },
+
+    _setEditorReference:function(){
+      this._editor=this.querySelector('rich-editor');
+    },
+
+    _disableEditor:function(){
+      var editor = this._editor;
+      editor.disable();
+    },
+
+    _enableEditor:function(){
+      var editor = this._editor;
+      editor.enable();
+    },
+
+    getContent:function(){
+      var editor = this._editor;
+      return editor.content();
+    }
+
+
+  });
+
+</script>

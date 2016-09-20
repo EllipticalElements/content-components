@@ -1,0 +1,84 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="content-behavior.html">
+
+<dom-module id="content-header">
+  <style>
+    :host {
+      position: relative;
+      display:block;
+      width:100%;
+    }
+
+    :host h2{
+      border:2px solid transparent;
+      margin-left:  var(--content-header-margin-left, -6px);
+    }
+
+    :host.active h2 {
+      border: var(--content-border-outline, 2px dashed #dadada);
+    }
+
+    :host.active h2:focus {
+      outline: none !important;
+      border: var(--content-border-outline, 2px dashed #9E9E9E);
+    }
+    :host.hidden {
+      opacity:0;
+      transition: all 0.25s linear;
+    }
+  </style>
+  <template>
+    <h2 id="contentHeader">
+      <content></content>
+    </h2>
+  </template>
+</dom-module>
+<script>
+
+  Polymer({
+
+    is: 'content-header',
+
+    behaviors: [Elliptical.ComponentBehavior, Elliptical.ContentBehavior],
+
+    properties: {
+
+    },
+
+    listeners: {},
+
+    ready: function () {
+      this._contentReady();
+      if (this._isEditMode) this._setContentEditable();
+    },
+
+    _setContentEditable: function () {
+      this.classList.add('active');
+      this.$.contentHeader.setAttribute('contenteditable', true);
+    },
+
+    _resetContentEditable:function(){
+      this.classList.remove('active');
+      this.$.contentHeader.removeAttribute('contenteditable');
+    },
+
+    _onContentComponentShow: function () {
+      this._setContentEditable();
+    },
+
+    _onContentComponentHide: function () {
+      this._resetContentEditable();
+    },
+
+    _onContentComponentSet:function(content){
+      if(content) this.$.contentHeader.innerHTML=content;
+      this.classList.remove('hidden');
+    },
+
+    getContent:function(){
+      return this.$.contentHeader.innerHTML;
+    }
+
+  });
+
+</script>

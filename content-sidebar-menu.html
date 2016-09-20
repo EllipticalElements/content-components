@@ -1,0 +1,64 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../elliptical-polymer-behaviors/component-behavior.html">
+<link rel="import" href="content-menu-behavior.html">
+
+<dom-module id="content-sidebar-menu">
+  <style>
+    :host .hide{
+      display:none;
+    }
+
+  </style>
+  <template>
+    <content></content>
+    <template is="dom-repeat" items="[[menu]]" as="menu">
+    <ui-button-dropdown class$="[[_showMenu(menu.showInMenu)]]" disable-blur="true"><a>[[menu.id]]</a>
+      <ui-dropdown class$="[[_getCssClass(menu.pages)]]">
+        <template is="dom-repeat" items="[[menu.pages]]" as="page">
+        <menu-item class$="[[_showMenu(page.showInMenu)]]">
+          <a href$="[[_getLink(page.id)]]" history-enabled>[[page.title]]</a>
+        </menu-item>
+        </template>
+      </ui-dropdown>
+    </ui-button-dropdown>
+    </template>
+  </template>
+</dom-module>
+<script>
+
+  /*
+
+     menuCategory{
+     id:String
+     order:Number
+     showInMenu:Boolean
+     pages:Array
+   }
+
+   menu:[menuCategory]
+
+
+   */
+
+  Polymer({
+
+    is: 'content-sidebar-menu',
+
+    behaviors: [Elliptical.ComponentBehavior,Elliptical.ContentMenuBehavior],
+
+    listeners: {},
+
+    ready: function () {
+      if(this.disableDataBinding) return;
+      this._setUtils();
+      this._setViewData();
+      this._events();
+      if(this.viewDataProp) this._setMenuByViewData(this.viewDataProp);
+      else this._setMenuByService();
+    }
+
+
+
+  });
+
+</script>

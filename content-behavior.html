@@ -1,0 +1,54 @@
+<link rel="import" href="../elliptical-polymer-behaviors/component-behavior.html">
+
+<script>
+
+  //Content Behavior
+  Elliptical.ContentBehavior = {};
+  Elliptical.ContentBehavior.properties = {
+    placeholderSelector: {
+      type: String,
+      value: '[content-placeholder]'
+    },
+
+    dataId:{
+      type:String,
+      value:null
+    },
+
+    _isEditMode:{
+      type:Boolean,
+      value:false
+    }
+
+  };
+
+  Elliptical.ContentBehavior._contentReady=function(){
+    var self=this;
+    var selector=this.placeholderSelector;
+    var placeholder=document.querySelector(selector);
+    if(placeholder) this._isEditMode= placeholder.classList.contains('edit-mode');
+  };
+
+  Elliptical.ContentBehavior.showComponent=function(){
+    this._isEditMode=true;
+    this._onContentComponentShow();
+  };
+
+  Elliptical.ContentBehavior.hideComponent=function(){
+    this._isEditMode=true;
+    this._onContentComponentHide();
+  };
+
+
+  Elliptical.ContentBehavior._onContentComponentShow=function(){};
+
+  Elliptical.ContentBehavior._onContentComponentHide=function(){};
+
+  Elliptical.ContentBehavior._onContentComponentSet=function(content){};
+
+  Elliptical.ContentBehavior.setContent=function(content){
+    this._onContentComponentSet(content);
+  };
+
+
+</script>

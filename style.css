@@ -1,0 +1,87 @@
+
+[content-placeholder].edit-mode rich-editor.hide-icon:before{
+    content:'\e9b8' !important;
+    color: #ccc;
+}
+
+[content-placeholder] .article-image-content h2{
+    margin-bottom:1em;
+}
+
+[content-placeholder] .article-image-content .article-image-container{
+    display:-webkit-flex;
+    display:flex;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+}
+
+
+[content-placeholder] .article-image-content .article-image-container>content-image{
+    width:35%;
+}
+
+[content-placeholder] .article-image-content .article-image-container>content-editor{
+    width:60%;
+}
+
+[content-placeholder] .article-image-content .article-image-container.reverse>content-image{
+    -webkit-order: 2;
+    order: 2;
+}
+
+[content-placeholder] .article-image-content .article-image-container.reverse>content-editor{
+    -webkit-order: 1;
+    order: 1;
+}
+
+[content-placeholder] .article-image-content .article-image-container.reverse-mobile-show-image>content-image{
+    -webkit-order: 2;
+    order: 2;
+}
+
+[content-placeholder] .article-image-content .article-image-container.reverse-mobile-show-image>content-editor{
+    -webkit-order: 1;
+    order: 1;
+}
+
+[content-placeholder] .article-image-content .article-image-container.reverse-mobile-hide-image>content-image{
+    -webkit-order: 2;
+    order: 2;
+}
+
+[content-placeholder] .article-image-content .article-image-container.reverse-mobile-hide-image>content-editor{
+    -webkit-order: 1;
+    order: 1;
+}
+
+[content-placeholder].hide-components [content-component]{
+    opacity:0 !important;
+    transition: all 0.25s linear;
+}
+
+@media (max-width: 640px) {
+    [content-placeholder] .article-image-content .article-image-container{
+        -webkit-flex-wrap: wrap;
+        flex-wrap:wrap
+    }
+    [content-placeholder] .article-image-content .article-image-container>*{
+        width:100% !important;
+    }
+    [content-placeholder] .article-image-content .article-image-container>content-image{
+        display:none;
+    }
+    [content-placeholder] .article-image-content .article-image-container.mobile-show-image>content-image{
+        display:block;
+        margin-bottom:1.5em;
+    }
+    [content-placeholder] .article-image-content .article-image-container.reverse-mobile-show-image>content-image{
+        -webkit-order: 1;
+        order: 1;
+        display:block;
+        margin-bottom:1.5em;
+    }
+    [content-placeholder] .article-image-content .article-image-container.reverse-mobile-show-image>content-editor{
+        -webkit-order: 2;
+        order: 2;
+    }
+}

@@ -1,0 +1,272 @@
+<link rel="import" href="../elliptical-polymer-behaviors/component-behavior.html">
+<link rel="import" href="../elliptical-polymer-behaviors/utils-behavior.html">
+<link rel="import" href="../elliptical-polymer-behaviors/viewdata-behavior.html">
+
+<script>
+
+  //Content Menu Behavior
+  Elliptical.ContentMenuBehavior = {};
+  Elliptical.ContentMenuBehavior.properties = {
+    service:{
+      type:String,
+      value:'Page'
+    },
+
+    timeoutDelay:{
+      type:Number,
+      value:750
+    },
+
+    linkRoot:{
+      type:String,
+      value:'/Page/Index'
+    },
+
+    viewDataProp:{
+      type:String,
+      value:null
+    },
+
+    disableDataBinding:{
+      type:Boolean,
+      value:false
+    },
+
+    menu:{
+      type: Array,
+      notify: true,
+      value: function () {
+        return [];
+      }
+    },
+
+    _service:{
+      type:Object,
+      value:null
+    },
+
+    _utils:{
+      type:Object,
+      value:null
+    },
+
+    _viewData:{
+      type:Object,
+      value:null
+    }
+
+  };
+
+
+
+  Elliptical.ContentMenuBehavior._events=function(){
+    var $document=$(document);
+    this._event($document,'page-content-category-add',this._onMenuCategoryAdd.bind(this));
+    this._event($document,'page-content-category-update',this._onMenuCategoryUpdate.bind(this));
+    this._event($document,'page-content-category-delete',this._onMenuCategoryDelete.bind(this));
+    this._event($document,'page-content-page-publish',this._onMenuPagePublish.bind(this));
+    this._event($document,'page-content-page-delete',this._onMenuPageDelete.bind(this));
+  };
+
+
+  Elliptical.ContentMenuBehavior._onMenuCategoryUpdate=function(event){
+    var detail=event.detail;
+    this._updateCategory(detail);
+  };
+
+  Elliptical.ContentMenuBehavior._onMenuCategoryAdd=function(event){
+    var detail=event.detail;
+    this._addCategory(detail);
+  };
+
+  Elliptical.ContentMenuBehavior._onMenuCategoryDelete=function(event){
+    var detail=event.detail;
+    this._deleteCategory(detail);
+  };
+
+  Elliptical.ContentMenuBehavior._onMenuPagePublish=function(event){
+    var detail=event.detail;
+    if(detail.isPublished !==true){
+      detail.isPublished=(detail.isPublished==='true');
+    }
+    var page=this._getPage(detail);
+    if(!page && detail.isPublished) this._addPage(detail);
+    else{
+      if(!detail.isPublished) this._deletePage(detail);
+      else this._updatePage(detail);
+    }
+  };
+
+
+  Elliptical.ContentMenuBehavior._onMenuPageDelete=function(event){
+    var detail=event.detail;
+    var page=this._getPageFromPagesById(detail.id);
+    if(page) this._deletePage(page);
+  };
+
+  Elliptical.ContentMenuBehavior._setMenuByService=function(){
+    this._setService();
+    this._setMenu();
+    this._fireEvent('menu-navigation-create',true);
+  };
+
+  Elliptical.ContentMenuBehavior._setMenuByViewData=function(prop){
+    var viewData=this._viewData;
+    this.menu=viewData.get(prop);
+  };
+
+  Elliptical.ContentMenuBehavior._setService=function(){
+    this._service=this.$service(this.service);
+  };
+
+  Elliptical.ContentMenuBehavior._setMenu=function(){
+    var self=this;
+    var delay=this.timeoutDelay;
+    var Service=this._service;
+    setTimeout(function(){
+      Service.getMenu(function(err,data){
+        self.menu=data;
+        self._fireEvent('menu-navigation-create',true);
+      });
+
+    },delay);
+  };
+
+  Elliptical.ContentMenuBehavior._showMenu=function(show){
+    if(!show) return 'hide';
+    else return '';
+  };
+
+  Elliptical.ContentMenuBehavior._excludeMenu=function(show){
+    return !(show);
+  };
+
+  Elliptical.ContentMenuBehavior._getCssClass=function(pages){
+    if(pages.length===0) return 'hide';
+    else return '';
+  };
+
+  Elliptical.ContentMenuBehavior._getLink=function(id){
+    return this.linkRoot + '/' + id;
+  };
+
+  Elliptical.ContentMenuBehavior._getItem=function(category){
+    var array=this._utils.array;
+    return array.findById(this.menu,category);
+  };
+
+  Elliptical.ContentMenuBehavior._getIndex=function(category){
+    var item=this._getItem(category);
+    return this.menu.indexOf(item);
+  };
+
+  Elliptical.ContentMenuBehavior._deleteCategory=function(params){
+    var category=params.category;
+    var index=this._getIndex(category);
+    this.splice('menu',index,1);
+  };
+
+  Elliptical.ContentMenuBehavior._updateCategory=function(params){
+    var oldCategory=params.oldCategory;
+    var category=params.category;
+    var item=this._getItem(oldCategory);
+    var index=this._getIndex(oldCategory);
+    item.id=category;
+    this.notifyPath('menu.' + index + '.id',item.id);
+  };
+
+  Elliptical.ContentMenuBehavior._addCategory=function(item){
+    if(!item.showInMenu) return;
+    item.pages=[];
+    var menu=this.menu;
+    this.push('menu',item);
+  };
+
+  Elliptical.ContentMenuBehavior._getPage=function(obj){
+    var category=obj.category;
+    var item=this._getItem(category);
+    var pages=item.pages;
+    var array=this._utils.array;
+    return array.findById(pages,obj.id);
+  };
+
+
+  Elliptical.ContentMenuBehavior._getPageFromPagesById=function(id){
+    var page=null;
+    var menu=this.menu;
+    var isSet=false;
+    if(menu){
+      menu.forEach(function(obj){
+        var category=obj.id;
+        var pages=obj.pages;
+        if(!isSet){
+          pages.forEach(function(o){
+            if(o.id.toLowerCase()===id.toLowerCase()){
+              isSet=true;
+              page=o;
+            }
+          });
+        }
+      });
+    }
+    return page;
+  };
+
+  Elliptical.ContentMenuBehavior._addPage=function(page){
+    var category=page.category;
+    var index=this._getIndex(category);
+    this.push('menu.' + index + '.pages',page);
+  };
+
+  Elliptical.ContentMenuBehavior._updatePage=function(page){
+    var category=page.category;
+    var item=this._getItem(category);
+    var index=this._getIndex(category);
+    var pages=item.pages;
+    var array=this._utils.array;
+    var itemPage= array.findById(pages,page.id);
+    var pageIndex=pages.indexOf(itemPage);
+    var showInMenu=(page.showInMenu===true || page.showInMenu==='true');
+    this.notifyPath('menu.' + index + '.pages.' + pageIndex + '.title',page.title);
+    this.notifyPath('menu.' + index + '.pages.' + pageIndex + '.showInMenu',showInMenu);
+  };
+
+  Elliptical.ContentMenuBehavior._deletePage=function(page){
+    var category=page.category;
+    var item=this._getItem(category);
+    if(!item) return;
+    var index=this._getIndex(category);
+    var pages=item.pages;
+    var array=this._utils.array;
+    var itemPage= array.findById(pages,page.id);
+    var pageIndex=pages.indexOf(itemPage);
+    if(pageIndex > -1)this.splice('menu.' + index + '.pages',pageIndex);
+  };
+
+  /***************************** EVENT PUBLISHERS *******************************************************************/
+
+
+  /**
+   *  Publish event
+   *  @param evt {string}
+   *  @param data {object}
+   *
+   */
+  Elliptical.ContentMenuBehavior._fireEvent=function(evt,data){
+    var self=this;
+    setTimeout(function(){
+      self.fire(evt,data);
+    },500);
+
+  };
+
+  Elliptical.ContentMenuBehavior._setUtils = function () {
+    this._utils=elliptical.utils;
+  };
+
+  Elliptical.ContentMenuBehavior._setViewData = function () {
+    this._viewData=elliptical.$ViewData;
+  };
+
+
+</script>

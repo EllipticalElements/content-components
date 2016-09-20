@@ -1,0 +1,65 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="content-menu-behavior.html">
+
+<dom-module id="content-menu">
+  <style>
+    :host .hide{
+      display:none;
+    }
+    :host[role="menu"]>menu-item-dropdown:hover>ui-dropdown.hide{
+      display:none !important;
+    }
+  </style>
+  <template>
+    <content></content>
+    <template is="dom-repeat" items="[[menu]]" as="menu">
+    <menu-item-dropdown class$="[[_showMenu(menu.showInMenu)]]" exclude-menu-item$="[[_excludeMenu(menu.showInMenu)]]"><a>[[menu.id]]</a>
+      <ui-dropdown class$="[[_getCssClass(menu.pages)]]">
+        <template is="dom-repeat" items="[[menu.pages]]" as="page">
+        <menu-item class$="[[_showMenu(page.showInMenu)]]" exclude-menu-item$="[[_excludeMenu(page.showInMenu)]]">
+          <a href$="[[_getLink(page.id)]]" history-enabled>[[page.title]]</a>
+        </menu-item>
+        </template>
+      </ui-dropdown>
+    </menu-item-dropdown>
+    </template>
+  </template>
+</dom-module>
+<script>
+
+  /*
+
+     menuCategory{
+     id:String
+     order:Number
+     showInMenu:Boolean
+     pages:Array
+   }
+
+   menu:[menuCategory]
+
+
+   */
+
+  Polymer({
+
+    is: 'content-menu',
+
+    behaviors: [Elliptical.ComponentBehavior,Elliptical.ContentMenuBehavior],
+
+    listeners: {},
+
+    ready: function () {
+      if(this.disableDataBinding) return;
+      this._setUtils();
+      this._setViewData();
+      this._events();
+      if(this.viewDataProp) this._setMenuByViewData(this.viewDataProp);
+      else this._setMenuByService();
+    }
+
+
+
+  });
+
+</script>

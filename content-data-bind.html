@@ -1,0 +1,145 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../elliptical-polymer-behaviors/component-behavior.html">
+<link rel="import" href="../elliptical-polymer-behaviors/viewdata-behavior.html">
+
+<dom-module id="content-data-bind">
+  <style>
+    :host {
+      display:none;
+    }
+  </style>
+</dom-module>
+<script>
+
+
+  Polymer({
+
+    is: 'content-data-bind',
+
+    behaviors: [Elliptical.ComponentBehavior,Elliptical.ViewDataBehavior],
+
+    properties:{
+      service: {
+        type: String,
+        value: 'Page'
+      },
+
+      pageId: {
+        type: String,
+        value: null
+      },
+
+      contentPlaceholderSelector: {
+        type: String,
+        value: '[content-placeholder]'
+      },
+
+      viewDataProp:{
+        type:String,
+        value:null
+      },
+
+      timeoutDelay:{
+        type:Number,
+        value:350
+      }
+    },
+
+    listeners: {},
+
+    ready: function () {
+      if(this.viewDataProp){
+        this._setViewData();
+        this._bindPageComponentsFromViewData(this.viewDataProp);
+      } else {
+        this._setInjectedServices();
+        this._bindPageComponentsFromService();
+      }
+    },
+
+    /**
+     *  Initialize/set injected services
+     */
+    _setInjectedServices:function(){
+      this._pageService = this.$service(this.service);
+    },
+
+    /**
+     *  Get the page placeholder element
+     *  @returns {object}
+     */
+    _getPlaceholder:function(){
+      var selector = this.contentPlaceholderSelector;
+      var placeholder = document.querySelector(selector);
+      if(!placeholder) return document.querySelector('body');
+      else return placeholder;
+    },
+
+    /**
+     *  Get page components
+     *  @returns {array}
+     */
+    _getPageComponents:function(){
+      var placeholder = this._getPlaceholder();
+      return $(placeholder).find('[content-component]');
+    },
+
+    /**
+     *  Set page components directly
+     *  @param page {object}
+     */
+    _setPageComponents:function(page){
+      var content=null;
+      if(page) content=page.content;
+      var components=this._getPageComponents();
+      $.each(components, function (i, component) {
+        var property = component.dataset.property;
+        var componentContent=null;
+        if(content) componentContent=content[property];
+        component.setContent(componentContent);
+      });
+      this._setPageVisibility();
+    },
+
+    /**
+     * Set page components visibility
+     * @private
+     */
+    _setPageVisibility:function(){
+      var delay=this.timeoutDelay;
+      var placeholder=this._getPlaceholder();
+      setTimeout(function(){
+        placeholder.classList.remove('hide-components');
+      },delay);
+    },
+
+    /**
+     *  Directly bind page components from service on page load
+     */
+    _bindPageComponentsFromService:function(){
+      var self=this;
+      var id=this.pageId;
+      this.timeoutDelay=100;
+      if(!id){
+        console.warn('WARNING: data binding page components through service call requires a page id set in the page-content element attribute');
+        return;
+      }
+      this._getPage(id,function(err,data){
+        self._setPageComponents(data);
+      });
+    },
+
+    /**
+     *  Directly bind page components from viewData on page load
+     *  @param prop {string}
+     */
+    _bindPageComponentsFromViewData:function(prop){
+      var viewData=this._viewData;
+      var page=viewData.get(prop);
+      this._setPageComponents(page);
+    }
+
+
+  });
+
+</script>
