@@ -16,7 +16,7 @@ bower install content-components --save
 
 <link rel="import" href="bower_components/content-components/content-components.html">
 
-<content-components></content-components>
+
 ```
 
 
