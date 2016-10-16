@@ -11,7 +11,7 @@
       display: block;
     }
 
-    :host hide {
+    :host .hide {
       display: none;
     }
 
@@ -222,9 +222,10 @@
 
     /**
      *  On Edit click handler
+     *  @param event {object}
      * @private
      */
-    _onEditClick: function () {
+    _onEditClick: function (event) {
       var file=this._getFileObject();
       file.active=true;
       var arr=[file];

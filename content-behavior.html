@@ -10,6 +10,11 @@
       value: '[content-placeholder]'
     },
 
+    id:{
+      type:String,
+      value:null
+    },
+
     dataId:{
       type:String,
       value:null
@@ -18,6 +23,11 @@
     _isEditMode:{
       type:Boolean,
       value:false
+    },
+
+    _utils:{
+      type:Object,
+      value:null
     }
 
   };
@@ -27,6 +37,7 @@
     var selector=this.placeholderSelector;
     var placeholder=document.querySelector(selector);
     if(placeholder) this._isEditMode= placeholder.classList.contains('edit-mode');
+    this._utils=elliptical.utils;
   };
 
   Elliptical.ContentBehavior.showComponent=function(){
@@ -46,9 +57,22 @@
 
   Elliptical.ContentBehavior._onContentComponentSet=function(content){};
 
+  Elliptical.ContentBehavior._setComponentId=function(content){
+    if(!this.id) {
+      var id=this.dataset.id;
+      if(id) this.id=id;
+      else{
+        this.id='content-' + this._utils.random.id(6);
+      }
+    }
+  };
+
   Elliptical.ContentBehavior.setContent=function(content){
     this._onContentComponentSet(content);
   };
 
+  Elliptical.ContentBehavior.getContent=function(){
+    return null;
+  };
 
 </script>
