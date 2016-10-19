@@ -64,6 +64,11 @@
         value:null
       },
 
+      files:{
+        type:String,
+        value:null
+      },
+
       _carousel:{
         type:Object,
         value:null
@@ -87,6 +92,7 @@
       this._setCarousel();
       this._setComponentId();
       this._setTemplateExtensions();
+      if(this.files) this._parseJsonFiles();
       this._events();
     },
 
@@ -174,6 +180,10 @@
     _setEditIconVisibility: function (show) {
       if (show) this.$.editIcon.classList.remove('hide');
       else this.$.editIcon.classList.add('hide');
+    },
+
+    _parseJsonFiles:function(){
+      if(this.files) this._files=JSON.parse(this.files);
     },
 
 
