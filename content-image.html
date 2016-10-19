@@ -164,6 +164,11 @@
         value: false
       },
 
+      defaultSrc:{
+        type: String,
+        value:null
+      },
+
       _locationService: {
         type: Object,
         value: null
@@ -227,8 +232,11 @@
      */
     _onEditClick: function (event) {
       var file=this._getFileObject();
-      file.active=true;
-      var arr=[file];
+      var arr;
+      if(file) {
+        file.active=true;
+        arr=[file];
+      }else arr=null;
       var id=this.id;
       var data={
         id:id,
@@ -403,6 +411,14 @@
      */
     _setImage: function () {
       if (this.file) this._setByFile(this.file);
+      else if(this.src) {
+        this._setSrc(this.src);
+        this._setVisibility();
+      }
+      else if(this.defaultSrc) {
+        this._setSrc(this.defaultSrc);
+        this._setVisibility();
+      }
       else this._setByPlaceholder();
     },
 
@@ -532,7 +548,7 @@
      * @public
      */
     getContent:function(){
-       return this.file;
+      return this.file;
     }
 
 
