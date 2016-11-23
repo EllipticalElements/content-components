@@ -1,0 +1,183 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="content-behavior.html">
+<link rel="import" href="../iron-icons/editor-icons.html">
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+
+<dom-module id="content-files">
+  <style>
+    :host {
+      position: relative;
+      display:block;
+      width:100%;
+    }
+    :host .edit-image {
+      padding: .75em;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      z-index: 9;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      background: #fff;
+    }
+
+    :host .edit-image iron-icon {
+      color: #cacaca;
+    }
+
+    :host.hidden {
+      opacity:0;
+      transition: all 0.25s linear;
+    }
+  </style>
+  <template>
+    <div class="edit-image hide" id="editIcon" on-tap="_onEditClick">
+      <iron-icon icon="editor:mode-edit"></iron-icon>
+      <paper-ripple></paper-ripple>
+    </div>
+    <content></content>
+  </template>
+</dom-module>
+<script>
+
+  Polymer({
+
+    is: 'content-files',
+
+    behaviors: [Elliptical.ComponentBehavior, Elliptical.ContentBehavior,Elliptical.TemplateExtensionsBehavior],
+
+    properties: {
+      templatePath:{
+        type:String,
+        value:null
+      },
+
+      contentSelector:{
+        type:String,
+        value:null
+      },
+
+      id:{
+        type:String,
+        value:null
+      },
+
+      files:{
+        type:String,
+        value:null
+      },
+
+      _contentElement:{
+        type:Object,
+        value:null
+      },
+
+      _files:{
+        type:Array,
+        value:null
+      }
+    },
+
+    listeners: {},
+
+    ready: function () {
+      this._contentReady();
+      this._setContentElement();
+      this._setComponentId();
+      this._setTemplateExtensions();
+      if(this.files) this._parseJsonFiles();
+      this._events();
+    },
+
+    /**
+     * Events
+     * @private
+     */
+    _events:function(){
+      this._event($(document),'media-manager-selected',this._onMediaSelected.bind(this));
+    },
+
+    _onContentComponentShow: function () {
+      this._setEditIconVisibility(true);
+    },
+
+    _onContentComponentHide: function () {
+      this._setEditIconVisibility(false);
+    },
+
+    _onContentComponentSet:function(files){
+      this._files=files;
+      if(files.length && files.length > 0)this._setCarouselItems(files);
+      this.classList.remove('hidden');
+    },
+
+    _onMediaSelected:function(event){
+      var detail=event.detail;
+      if(this.id!==detail.id) return;
+      this._files=detail.files;
+      this._renderFiles(detail.files);
+    },
+
+    /**
+     *  On Edit click handler
+     * @private
+     */
+    _onEditClick: function (event) {
+      var arr=this._files;
+      var id=this.id;
+      var data={
+        id:id,
+        files:arr,
+        mode:'multi-select'
+      };
+      this.fire('media-manager-show',data);
+    },
+
+
+    _setContentElement:function(){
+      var selector=this.contentSelector;
+      if(!selector){
+        console.warn('WARNING: CONTENT-FILES requires a content element selector');
+        return;
+      }
+      this._contentElement=this.querySelector(selector);
+    },
+
+    _renderFiles:function(files){
+      var self=this;
+      var templateId=this.templatePath;
+      if(!templateId){
+        console.warn('WARNING: CONTENT-FILES template property required...');
+        return;
+      }
+      if(!files) return;
+      var template=this._template;
+      var contentElement=this._contentElement;
+      template.render(templateId, {files:files}, function (err, out) {
+        if(!err) {
+          contentElement.innerHTML=out;
+        }
+      });
+    },
+
+    /**
+     *  Set edit icon visibility state
+     * @param show {boolean}
+     * @private
+     */
+    _setEditIconVisibility: function (show) {
+      if (show) this.$.editIcon.classList.remove('hide');
+      else this.$.editIcon.classList.add('hide');
+    },
+
+   _parseJsonFiles:function(){
+     if(this.files) this._files=JSON.parse(this.files);
+   },
+
+    getContent:function(){
+       return this._files;
+    }
+
+  });
+
+</script>

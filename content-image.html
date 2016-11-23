@@ -92,7 +92,7 @@
         <iron-icon icon="editor:mode-edit"></iron-icon>
         <paper-ripple></paper-ripple>
       </div>
-      <img id="contentImage" on-tap="_onImageClick">
+      <img id="contentImage" on-tap="_onImageClick" data-id="[[imageDataId]]">
       <iron-icon icon="image:photo-library"></iron-icon>
     </div>
   </template>
@@ -144,6 +144,11 @@
         }
       },
 
+      fileJson:{
+        type:String,
+        value:null
+      },
+
       placeholderClass: {
         type: String,
         value: null
@@ -165,8 +170,13 @@
       },
 
       defaultSrc:{
-        type: String,
-        value:null
+         type: String,
+         value:null
+      },
+
+      imageDataId:{
+         type:String,
+         value:null
       },
 
       _locationService: {
@@ -195,6 +205,7 @@
       this._setUtils();
       this._setId();
       this._setWidth();
+      this._setFileFromJson();
       this._setImage();
       this._setLinkCursor();
       this._setTitle();
@@ -235,7 +246,7 @@
       var arr;
       if(file) {
         file.active=true;
-        arr=[file];
+         arr=[file];
       }else arr=null;
       var id=this.id;
       var data={
@@ -263,6 +274,7 @@
       if(file.dataUrl && this._compareToPlaceholder(file.dataUrl)) this._setByPlaceholder();
       else this._setByFile(file);
       this._setLinkCursor();
+      this.fire('content-image-selected',file);
     },
 
     /**
@@ -370,6 +382,7 @@
         type: null,
         isImage: null,
         title: null,
+        meta:null,
         link: null,
         width: null,
         active: null,
@@ -394,6 +407,19 @@
     _setWidth: function () {
       if (this.width > 0 && !this.queryStringWidth) {
         this.$.contentImage.style.width = this.width + 'px';
+      }
+    },
+
+    /**
+     *  Set File from json
+     * @private
+     */
+    _setFileFromJson:function(){
+      if(this.fileJson){
+        try{
+           this.file=JSON.parse(this.fileJson);
+        }catch(ex){
+        }
       }
     },
 
@@ -548,7 +574,7 @@
      * @public
      */
     getContent:function(){
-      return this.file;
+       return this.file;
     }
 
 
