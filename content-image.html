@@ -1,9 +1,9 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="content-behavior.html">
+<link rel="import" href="content-edit-icon.html">
 <link rel="import" href="../elliptical-polymer-behaviors/blob-behavior.html">
 <link rel="import" href="../iron-icons/image-icons.html">
-<link rel="import" href="../iron-icons/editor-icons.html">
-<link rel="import" href="../paper-ripple/paper-ripple.html">
+
 
 <dom-module id="content-image">
   <style>
@@ -13,22 +13,6 @@
 
     :host .hide {
       display: none;
-    }
-
-    :host .edit-image {
-      padding: .75em;
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      z-index: 9;
-      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-      background: #fff;
-    }
-
-    :host .edit-image iron-icon {
-      color: #cacaca;
-
     }
 
     :host > div {
@@ -88,10 +72,7 @@
   </style>
   <template>
     <div>
-      <div class="edit-image hide" id="editIcon" on-tap="_onEditClick">
-        <iron-icon icon="editor:mode-edit"></iron-icon>
-        <paper-ripple></paper-ripple>
-      </div>
+      <content-edit-icon class="hide" id="editIcon" on-tap="_onEditClick"></content-edit-icon>
       <img id="contentImage" on-tap="_onImageClick" data-id="[[imageDataId]]">
       <iron-icon icon="image:photo-library"></iron-icon>
     </div>
