@@ -103,7 +103,7 @@
         value: null
       },
 
-      newLinkTarget: {
+      linkNewTarget: {
         type: Boolean,
         value: false
       },
@@ -210,8 +210,10 @@
      * @private
      */
     _onImageClick: function (event) {
-      var link = this.link;
-      if (!link) return;
+      var link;
+      if(this.file) link=this.file.link;
+      if (!link)link=this.link;
+      if(!link) return;
       var isDataUrl=this._isDataUrl(link);
       if(isDataUrl) this._openBlob(link);
       else this._openWindow(link);
@@ -304,7 +306,10 @@
      * @private
      */
     _openWindow:function(link){
-      if (!this.newLinkTarget) {
+      var newTarget;
+      if(this.file) newTarget=this.file.newTarget;
+      if(!newTarget) newTarget=this.linkNewTarget;
+      if (!newTarget) {
         var Location = this._locationService;
         var path = this.pagePath;
         if (link.indexOf(path) > -1 && Location) Location.href = link;
