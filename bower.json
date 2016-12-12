@@ -1,6 +1,6 @@
 {
   "name": "content-components",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "authors": [
     "S. Francis"
   ],
@@ -39,7 +39,8 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
     "elliptical-polymer-behaviors": "~1.2.1",
-    "rich-editor": "~1.0.3"
+    "rich-editor": "~1.0.3",
+    "google-youtube": "~1.2.1"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

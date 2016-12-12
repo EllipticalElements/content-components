@@ -1,0 +1,473 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="content-behavior.html">
+<link rel="import" href="content-edit-icon.html">
+<link rel="import" href="../elliptical-polymer-behaviors/blob-behavior.html">
+<link rel="import" href="../google-youtube/google-youtube.html">
+<link rel="import" href="../iron-icons/image-icons.html">
+
+
+<dom-module id="content-video">
+  <style>
+    :host {
+      display: block;
+    }
+
+    :host .hide {
+      display: none;
+    }
+
+    :host > div {
+      transition: all 0.25s linear;
+      opacity: 0;
+      position: relative;
+    }
+
+    :host > div > iron-icon {
+      display: none;
+    }
+
+    :host ::content img#thumbnail {
+      max-width: 100%;
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    :host.view > div {
+      opacity: 1;
+      transition: all 0.25s linear;
+    }
+
+    :host.placeholder > div {
+      background: #f5f5f5;
+      position: relative;
+    }
+
+    :host.placeholder > div > iron-icon {
+      color: #757575;
+      position: absolute;
+      top: 40%;
+      left: 45%;
+      width: 48px;
+      height: 48px;
+      display: -webkit-flex;
+      display: flex;
+    }
+
+    :host.hidden {
+      opacity:0;
+      transition: all 0.25s linear;
+    }
+
+    @media only screen and (max-width: 640px) and (min-width: 220px) {
+      :host.placeholder > div > iron-icon {
+        top: 45%;
+        left: 45%;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+  </style>
+  <template>
+    <div>
+      <content-edit-icon class="hide" id="editIcon" on-tap="_onEditClick"></content-edit-icon>
+      <google-youtube id="youtubeVideo"></google-youtube>
+      <iron-icon icon="image:switch-video"></iron-icon>
+    </div>
+  </template>
+</dom-module>
+<script>
+
+  Polymer({
+
+    is: 'content-video',
+
+    behaviors: [Elliptical.ComponentBehavior, Elliptical.ContentBehavior, Elliptical.BlobBehavior],
+
+    properties: {
+
+      id:{
+        type:String,
+        value:null
+      },
+
+      videoId:{
+        type:String,
+        value:null
+      },
+
+      src: {
+        type: String,
+        value: null
+      },
+
+      title: {
+        type: String,
+        value: null
+      },
+
+      queryStringWidth: {
+        type: Boolean,
+        value:false
+      },
+
+      file: {
+        type: Object,
+        value: function () {
+          return null;
+        }
+      },
+
+      fileJson:{
+        type:String,
+        value:null
+      },
+
+      placeholderClass: {
+        type: String,
+        value: null
+      },
+
+      useFileQueryWidth: {
+        type: Boolean,
+        value: false
+      },
+
+      defaultSrc:{
+         type: String,
+         value:null
+      },
+
+      imageDataId:{
+         type:String,
+         value:null
+      },
+
+      _dataUrl:{
+        type:String,
+        value:null
+      }
+
+    },
+
+    listeners: {},
+
+    /**
+     * Ready
+     */
+    ready: function () {
+      this._setUtils();
+      this._setId();
+      this._setWidth();
+      this._setFileFromJson();
+      this._setImage();
+      this._setVideo();
+      this._events();
+      this._contentReady();
+      if (this._isEditMode) this._setEditIconVisibility(true);
+    },
+
+    /**
+     * Events
+     * @private
+     */
+    _events:function(){
+      this._event($(document),'media-manager-selected',this._onFileSelected.bind(this));
+    },
+
+    /**
+     *  On Edit click handler
+     *  @param event {object}
+     * @private
+     */
+    _onEditClick: function (event) {
+      var file=this._getFileObject();
+      var arr;
+      if(file) {
+        file.active=true;
+         arr=[file];
+      }else arr=null;
+      var id=this.id;
+      var data={
+        id:id,
+        files:arr,
+        mode:'select'
+      };
+      this.fire('media-manager-show',data);
+    },
+
+    /**
+     * On file selected event handler
+     * @param event {object}
+     * @private
+     */
+    _onFileSelected:function(event){
+      var detail=event.detail;
+      if(this.id!==detail.id) return;
+      var files=detail.files;
+      var file=files[0];
+      file.active=true;
+      this.file=file;
+      this.classList.remove('placeholder');
+      if(file.dataUrl && this._compareToPlaceholder(file.dataUrl)) this._setByPlaceholder();
+      else this._setByFile(file);
+      this._setVideoByFile();
+      this.fire('content-image-selected',file);
+    },
+
+    /**
+     *  On show component edit mode
+     * @private
+     */
+    _onContentComponentShow: function () {
+      this._setEditIconVisibility(true);
+    },
+
+    /**
+     *  On hide component edit mode
+     * @private
+     */
+    _onContentComponentHide: function () {
+      this._setEditIconVisibility(false);
+    },
+
+    /**
+     *  On set content
+     */
+    _onContentComponentSet:function(content){
+      if (content) this._setByFile(content);
+      this.classList.remove('hidden');
+    },
+
+    /**
+     * Get query string width value
+     * @param width {number}
+     * @returns {string}
+     * @private
+     */
+    _getQueryStringWidth:function(width){
+      if(width && this.queryStringWidth) return width;
+      else return null;
+    },
+
+    /**
+     * Get query formated src string
+     * @param src {string}
+     * @param width {number}
+     * @returns {string}
+     * @private
+     */
+    _getQueryStringFormattedSrc: function (src,width) {
+      var queryStringWidth=this._getQueryStringWidth(width);
+      if (queryStringWidth)return this.__queryStringFormatSrcWidth(src, queryStringWidth);
+      else return src;
+    },
+
+    /**
+     *  Get file object
+     * @returns {object}
+     * @private
+     */
+    _getFileObject: function () {
+      return this.file;
+    },
+
+    /**
+     * Get new file entity
+     * @returns {object}
+     * @private
+     */
+    _getNewFileEntity:function(){
+      var file = {
+        id: null,
+        idStamp: null,
+        blob: null,
+        url: null,
+        dataUrl: null,
+        size: null,
+        total: null,
+        type: null,
+        isImage: null,
+        title: null,
+        meta:null,
+        link: null,
+        width: null,
+        active: null,
+        dataLink: null,
+        newTarget: null
+      };
+      return file;
+    },
+
+    /**
+     *  Set id
+     * @private
+     */
+    _setId:function(){
+      if(!this.id) this.id=this._getImageRandomId(6);
+    },
+
+    /**
+     *  Set width
+     * @private
+     */
+    _setWidth: function () {
+      if (this.width > 0 && !this.queryStringWidth) {
+        
+      }
+    },
+
+    /**
+     *  Set File from json
+     * @private
+     */
+    _setFileFromJson:function(){
+      if(this.fileJson){
+        try{
+           this.file=JSON.parse(this.fileJson);
+        }catch(ex){
+        }
+      }
+    },
+
+    
+    /**
+     *  Set image intermediary method
+     * @private
+     */
+    _setImage: function () {
+      if (this.file) this._setByFile(this.file);
+      else if(this.src) {
+        this._setSrc(this.src);
+        this._setVisibility();
+      }
+      else if(this.defaultSrc) {
+        this._setSrc(this.defaultSrc);
+        this._setVisibility();
+      }
+      else this._setByPlaceholder();
+    },
+
+    _setVideo:function(){
+       file=this.file;
+       if(file && file.meta){
+          this.$.youtubeVideo.videoId=file.meta;
+       }else if(this.videoId){
+          this.$.youtubeVideo.videoId=this.videoId;
+       }
+    },
+
+    /**
+     *  Set image src attribute
+     * @param src {string}
+     * @private
+     */
+    _setSrc: function (src) {
+      src = this._getQueryStringFormattedSrc(src);
+      this.$.youtubeVideo.thumbnail=src;
+    },
+
+    /**
+     *  Set by file
+     * @param file
+     * @private
+     */
+    _setByFile: function (file) {
+      var src;
+      if (file.dataUrl) {
+        src = file.dataUrl;
+        this._dataUrl=src;
+        this.queryStringWidth = false;
+        if(!file.id) file.id=this._getImageRandomId(6);
+        if(this._compareToPlaceholder(src)){
+          this._setByPlaceholder();
+        }else{
+          this._setSrc(src,null);
+          this._setFileObject(file);
+          this._setVisibility();
+        }
+      }
+      else if (file.url) {
+        src = file.url;
+        this._url=src;
+        if(!file.id) file.id=this._getImageId(src);
+        if(!file.id) file.id=this._getImageRandomId(6);
+        this._setSrc(src,file.width);
+        this._setFileObject(file);
+        this._setVisibility();
+      } else this._setByPlaceholder();
+    },
+
+    _setVideoByFile:function(){
+        this._setVideo();
+    },
+
+    /**
+     *  Set by placeholder file
+     * @private
+     */
+    _setByPlaceholder: function () {
+      this.classList.add('placeholder');
+      if (this.placeholderClass) this.classList.add(this.placeholderClass);
+      var url = this._placeholderImage();
+      this._dataUrl=url;
+      this.$.youtubeVideo.thumbnail=url;
+      this._setPlaceHolderFileObject(url);
+      this._setVisibility();
+    },
+
+    /**
+     *  Set file obj props
+     * @param file {object}
+     * @private
+     */
+    _setFileObject:function(file){
+      file.isImage=true;
+      file.active=true;
+    },
+
+    /**
+     *  Set placeholder file object props
+     * @param dataUrl {string}
+     * @private
+     */
+    _setPlaceHolderFileObject:function(dataUrl){
+      var file=this._getNewFileEntity();
+      file.id=this._getImageRandomId(6);
+      file.dataUrl=dataUrl;
+      file.isImage=true;
+      file.title=this.title;
+      file.active=true;
+      this.file=file;
+    },
+
+    /**
+     *  Set visibility
+     * @private
+     */
+    _setVisibility: function () {
+      this.classList.add('view');
+    },
+
+    /**
+     *  Set edit icon visibility state
+     * @param show {boolean}
+     * @private
+     */
+    _setEditIconVisibility: function (show) {
+      if (show) this.$.editIcon.classList.remove('hide');
+      else this.$.editIcon.classList.add('hide');
+    },
+
+    /**
+     *  Get component content
+     * @public
+     */
+    getContent:function(){
+       return this.file;
+    }
+
+
+  });
+
+</script>
