@@ -50,6 +50,7 @@
     this._onContentComponentHide();
   };
 
+  Elliptical.ContentBehavior._onEditClick=function(){};
 
   Elliptical.ContentBehavior._onContentComponentShow=function(){};
 
@@ -73,6 +74,10 @@
 
   Elliptical.ContentBehavior.getContent=function(){
     return null;
+  };
+
+  Elliptical.ContentBehavior.editAction=function(){
+    this._onEditClick();
   };
 
 </script>
