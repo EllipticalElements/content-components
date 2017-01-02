@@ -11,22 +11,35 @@
       display:block;
       width:100%;
     }
-
-    :host [data-item]{
+    :host content-edit-icon{
+      top:var(--content-collapse-add-icon-top, -43px);
+    }
+    :host ::content [data-item]{
       position:relative;
     }
 
-    :host [data-field]{
+    :host ::content [data-field]{
       position:relative;
       border:var(--content-collapse-outline, 2px dashed transparent);
-      margin-left:  var(--content-header-margin-left, -6px);
     }
 
-    :host.active [data-field] {
+    :host ::content [data-delete]{
+      display:none;
+    }
+
+    :host.active ::content [data-delete]{
+      display: -webkit-inline-flex;
+      display: inline-flex;
+      cursor:pointer;
+    }
+
+    :host.active ::content [data-field] {
       border: var(--content-collapse-outline-active, 2px dashed #dadada);
+      min-width:var(--content-collapse-field-width, 400px);
+      max-width:100%;
     }
 
-    :host.active [data-field]:focus {
+    :host.active ::content [data-field]:focus {
       outline: none !important;
       border: var(--content-collapse-outline-focus, 2px dashed #9E9E9E);
     }
@@ -61,6 +74,7 @@
     ready: function () {
       this._contentReady();
       this._setComponent();
+      this._setTemplateExtensions();
       this._events();
     },
 
@@ -69,20 +83,23 @@
      * @private
      */
     _events:function(){
-      this._event(this.element,'[data-delete]',this._onDeleteClick.bind(this));
+      var click=this._data.click;
+      this._event(this.element,click,'[data-delete]',this._onDeleteClick.bind(this));
     },
 
     _onContentComponentShow: function () {
+      this.classList.add('active');
       this._setEditIconVisibility(true);
+      this._setContentEditable();
     },
 
     _onContentComponentHide: function () {
+      this.classList.remove('active');
       this._setEditIconVisibility(false);
+      this._removeContentEditable();
     },
 
     _onContentComponentSet:function(files){
-      this._files=files;
-      if(files.length && files.length > 0)this._setCarouselItems(files);
       this.classList.remove('hidden');
     },
 
@@ -91,7 +108,7 @@
      */
     _onDeleteClick:function(event){
       var target=$(event.currentTarget);
-      var item=target.parent('data-item');
+      var item=target.parents('[data-item]');
       item.remove();
     },
 
@@ -108,6 +125,19 @@
       this._renderComponentTemplate(model);
     },
 
+    _setContentEditable:function(){
+      var fields=this.element.find('[data-field]');
+      $.each(fields,function(index,field){
+          field.setAttribute('contenteditable',true);
+      });
+    },
+
+    _removeContentEditable:function(){
+      var fields=this.element.find('[data-field]');
+      $.each(fields,function(index,field){
+        field.removeAttribute('contenteditable');
+      });
+    },
 
     /**
      *  Gets item entity prop/value from data-field attributes and innerHTML
@@ -153,7 +183,8 @@
 
 
     getContent:function(){
-       return this._getContent();
+       var content=this._getContent();
+       return content;
     }
 
   });

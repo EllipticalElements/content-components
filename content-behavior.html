@@ -111,7 +111,8 @@
 
   Elliptical.ContentBehavior._onTemplateRender=function(html) {
     var component=this._component;
-    component.appendChild(html);
+    $html=$(html);
+    $(component).append($html);
   };
 
   Elliptical.ContentBehavior._renderComponentTemplate=function(items){
@@ -121,7 +122,7 @@
       console.warn('WARNING: template property required...');
       return;
     }
-    if(!files) return;
+    if(!items) return;
     var template=this._template;
     template.render(templateId, {items:items}, function (err, out) {
       if(!err) self._onTemplateRender(out);
