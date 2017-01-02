@@ -10,17 +10,17 @@
     }
 
     :host h2{
-      border:2px solid transparent;
+      border:var(--content-header-outline, 2px dashed transparent);
       margin-left:  var(--content-header-margin-left, -6px);
     }
 
     :host.active h2 {
-      border: var(--content-border-outline, 2px dashed #dadada);
+      border: var(--content-header-outline-active, 2px dashed #dadada);
     }
 
     :host.active h2:focus {
       outline: none !important;
-      border: var(--content-border-outline, 2px dashed #9E9E9E);
+      border: var(--content-header-outline-focus, 2px dashed #9E9E9E);
     }
     :host.hidden {
       opacity:0;

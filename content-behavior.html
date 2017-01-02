@@ -5,9 +5,19 @@
   //Content Behavior
   Elliptical.ContentBehavior = {};
   Elliptical.ContentBehavior.properties = {
+    templatePath:{
+      type:String,
+      value:null
+    },
+
     placeholderSelector: {
       type: String,
       value: '[content-placeholder]'
+    },
+
+    componentSelector:{
+      type:String,
+      value:null
     },
 
     id:{
@@ -20,12 +30,42 @@
       value:null
     },
 
+    jsonModel:{
+      type:String,
+      value:null
+    },
+
+    defaultJsonModel:{
+      type:String,
+      value:null
+    },
+
     _isEditMode:{
       type:Boolean,
       value:false
     },
 
+    _component:{
+      type:Object,
+      value:null
+    },
+
+    _componentId:{
+      type:String,
+      value:null
+    },
+
     _utils:{
+      type:Object,
+      value:null
+    },
+
+    _model:{
+      type:Object,
+      value:null
+    },
+
+    _defaultModel:{
       type:Object,
       value:null
     }
@@ -33,11 +73,12 @@
   };
 
   Elliptical.ContentBehavior._contentReady=function(){
-    var self=this;
     var selector=this.placeholderSelector;
     var placeholder=document.querySelector(selector);
     if(placeholder) this._isEditMode= placeholder.classList.contains('edit-mode');
     this._utils=elliptical.utils;
+    this._setJsonModel();
+    this._setDefaultJsonModel();
   };
 
   Elliptical.ContentBehavior.showComponent=function(){
@@ -66,6 +107,54 @@
         this.id='content-' + this._utils.random.id(6);
       }
     }
+  };
+
+  Elliptical.ContentBehavior._onTemplateRender=function(html) {
+    var component=this._component;
+    component.appendChild(html);
+  };
+
+  Elliptical.ContentBehavior._renderComponentTemplate=function(items){
+    var self=this;
+    var templateId=this.templatePath;
+    if(!templateId){
+      console.warn('WARNING: template property required...');
+      return;
+    }
+    if(!files) return;
+    var template=this._template;
+    template.render(templateId, {items:items}, function (err, out) {
+      if(!err) self._onTemplateRender(out);
+    });
+  };
+
+  Elliptical.ContentBehavior._setDefaultJsonModel=function() {
+    var json=this.defaultJsonModel;
+    if(json){
+      try{
+        var model=JSON.parse(json);
+        this._defaultModel=model;
+      }catch(ex){
+
+      }
+    }
+  };
+
+  Elliptical.ContentBehavior._setJsonModel=function() {
+    var json=this.jsonModel;
+    if(json){
+      try{
+        var model=JSON.parse(json);
+        this._model=model;
+      }catch(ex){
+
+      }
+    }
+  };
+
+  Elliptical.ContentBehavior._setComponent=function(){
+    this._component=this.querySelector(this.componentSelector);
+    this._componentId=this._component.getAttribute('id');
   };
 
   Elliptical.ContentBehavior.setContent=function(content){

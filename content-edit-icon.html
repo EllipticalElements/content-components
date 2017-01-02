@@ -22,14 +22,20 @@
     }
   </style>
   <template>
-      <iron-icon icon="editor:mode-edit"></iron-icon>
+      <iron-icon icon="[[editIcon]]"></iron-icon>
       <paper-ripple></paper-ripple>
   </template>
 </dom-module>
 <script>
 
   Polymer({
-    is: 'content-edit-icon'
+    is: 'content-edit-icon',
+    properties:{
+      editIcon:{
+        type:String,
+        value:'editor:mode-edit'
+      }
+    }
   });
 
 </script>
