@@ -1,0 +1,161 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="content-behavior.html">
+<link rel="import" href="content-edit-icon.html">
+<link rel="import" href="../ui-collapse/ui-collapse.html">
+<link rel="import" href="../elliptical-polymer-behaviors/template-extensions-behavior.html">
+
+<dom-module id="content-collapse">
+  <style>
+    :host {
+      position: relative;
+      display:block;
+      width:100%;
+    }
+
+    :host [data-item]{
+      position:relative;
+    }
+
+    :host [data-field]{
+      position:relative;
+      border:var(--content-collapse-outline, 2px dashed transparent);
+      margin-left:  var(--content-header-margin-left, -6px);
+    }
+
+    :host.active [data-field] {
+      border: var(--content-collapse-outline-active, 2px dashed #dadada);
+    }
+
+    :host.active [data-field]:focus {
+      outline: none !important;
+      border: var(--content-collapse-outline-focus, 2px dashed #9E9E9E);
+    }
+
+    :host.hidden {
+      opacity:0;
+      transition: all 0.25s linear;
+    }
+  </style>
+  <template>
+    <content-edit-icon class="hide" id="editIcon" on-tap="_onEditClick" edit-icon="add"></content-edit-icon>
+    <content></content>
+  </template>
+</dom-module>
+<script>
+
+  Polymer({
+
+    is: 'content-collapse',
+
+    behaviors: [Elliptical.ComponentBehavior, Elliptical.ContentBehavior,Elliptical.TemplateExtensionsBehavior],
+
+    properties: {
+      componentSelector:{
+        type:String,
+        value:'ui-collapse'
+      }
+    },
+
+    listeners: {},
+
+    ready: function () {
+      this._contentReady();
+      this._setComponent();
+      this._events();
+    },
+
+    /**
+     * Events
+     * @private
+     */
+    _events:function(){
+      this._event(this.element,'[data-delete]',this._onDeleteClick.bind(this));
+    },
+
+    _onContentComponentShow: function () {
+      this._setEditIconVisibility(true);
+    },
+
+    _onContentComponentHide: function () {
+      this._setEditIconVisibility(false);
+    },
+
+    _onContentComponentSet:function(files){
+      this._files=files;
+      if(files.length && files.length > 0)this._setCarouselItems(files);
+      this.classList.remove('hidden');
+    },
+
+    /**
+     *  On Delete click handler
+     */
+    _onDeleteClick:function(event){
+      var target=$(event.currentTarget);
+      var item=target.parent('data-item');
+      item.remove();
+    },
+
+    /**
+     *  On Edit click handler
+     * @private
+     */
+    _onEditClick: function (event) {
+      var model=this._defaultModel;
+      if(!model)return;
+      else if(!model.length){
+        model=[model];
+      }
+      this._renderComponentTemplate(model);
+    },
+
+
+    /**
+     *  Gets item entity prop/value from data-field attributes and innerHTML
+     *  @returns {object}
+     */
+    _getItemEntity:function(item){
+      var entity={};
+      var fields=$(item).find('[data-field]');
+      $.each(fields,function(index,field){
+        var prop=field.dataset.field;
+        var value=field.innerHTML;
+        entity[prop]=value;
+      });
+
+      return entity;
+    },
+
+    /**
+     *  Gets item array model
+     *  @returns {array}
+     */
+    _getContent:function(){
+      var self=this;
+      var arr=[];
+      var items=this.element.find('[data-item]');
+      $.each(items,function(index,element){
+        var entity=self._getItemEntity(element);
+        arr.push(entity);
+      });
+
+      return arr;
+    },
+
+    /**
+     *  Set edit icon visibility state
+     * @param show {boolean}
+     * @private
+     */
+    _setEditIconVisibility: function (show) {
+      if (show) this.$.editIcon.classList.remove('hide');
+      else this.$.editIcon.classList.add('hide');
+    },
+
+
+    getContent:function(){
+       return this._getContent();
+    }
+
+  });
+
+</script>
