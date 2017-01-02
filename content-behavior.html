@@ -40,6 +40,11 @@
       value:null
     },
 
+    itemsProperty:{
+      type:String,
+      value:'items'
+    },
+
     _isEditMode:{
       type:Boolean,
       value:false
@@ -119,12 +124,14 @@
     var self=this;
     var templateId=this.templatePath;
     if(!templateId){
-      console.warn('WARNING: template property required...');
+      console.warn('WARNING: content element template property required...');
       return;
     }
     if(!items) return;
     var template=this._template;
-    template.render(templateId, {items:items}, function (err, out) {
+    var modelObj={};
+    modelObj[this.itemsProperty]=items;
+    template.render(templateId, modelObj, function (err, out) {
       if(!err) self._onTemplateRender(out);
     });
   };
