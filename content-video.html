@@ -143,6 +143,11 @@
          value:null
       },
 
+      videoMaxHeight:{
+         type:Number,
+         value:0
+      },
+
       _dataUrl:{
         type:String,
         value:null
@@ -173,6 +178,9 @@
      */
     _events:function(){
       this._event($(document),'media-manager-selected',this._onFileSelected.bind(this));
+      if(this.videoMaxHeight){
+         this._event($(document),'google-youtube-state-change',this._onChangeState.bind(this));
+      }
     },
 
     /**
@@ -194,6 +202,17 @@
         mode:'select'
       };
       this.fire('media-manager-show',data);
+    },
+
+    _onChangeState:function(event){
+       var detail=event.detail;
+       var target=detail.target;
+       if(!target) return;
+       var iframe=target.a; 
+       if(iframe){
+         var queryIframe=this.querySelector('iframe');
+         if(iframe===queryIframe) this.style.maxHeight=this.videoMaxHeight + 'px';
+       }
     },
 
     /**
