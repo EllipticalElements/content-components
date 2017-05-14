@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer.html">
+
 <link rel="import" href="content-behavior.html">
 <link rel="import" href="content-edit-icon.html">
 <link rel="import" href="../ui-collapse/ui-collapse.html">
@@ -42,11 +42,16 @@
     :host.active ::content [data-field]:focus {
       outline: none !important;
       border: var(--content-collapse-outline-focus, 2px dashed #9E9E9E);
+      
     }
 
     :host.hidden {
       opacity:0;
       transition: all 0.25s linear;
+    }
+
+    :host ::content section.auto-height{
+      height:auto !important;
     }
   </style>
   <template>
@@ -85,6 +90,8 @@
     _events:function(){
       var click=this._data.click;
       this._event(this.element,click,'[data-delete]',this._onDeleteClick.bind(this));
+      this._event(this.element,'focus','section [data-field]',this._onFocus.bind(this));
+      this._event(this.element,'blur','section [data-field]',this._onBlur.bind(this));
     },
 
     _onContentComponentShow: function () {
@@ -110,6 +117,18 @@
       var target=$(event.currentTarget);
       var item=target.parents('[data-item]');
       item.remove();
+    },
+
+    _onFocus:function(event){
+       var target=$(event.currentTarget);
+       var section=target.parents('section');
+       section.addClass('auto-height');
+    },
+
+    _onBlur:function(event){
+       var target=$(event.currentTarget);
+       var section=target.parents('section');
+       section.removeClass('auto-height');
     },
 
     /**

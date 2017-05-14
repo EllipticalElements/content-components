@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer.html">
+<
 <link rel="import" href="content-behavior.html">
 <link rel="import" href="content-edit-icon.html">
 <link rel="import" href="../elliptical-polymer-behaviors/blob-behavior.html">
@@ -114,8 +114,8 @@
       },
 
       queryStringWidth: {
-        type: Boolean,
-        value:false
+        type: String,
+        value:null
       },
 
       file: {
@@ -325,7 +325,8 @@
      * @private
      */
     _getQueryStringWidth:function(width){
-      if(width && this.queryStringWidth) return width;
+      if(width)return width;
+      else if(this.queryStringWidth) return this.queryStringWidth;
       else return null;
     },
 
@@ -338,7 +339,7 @@
      */
     _getQueryStringFormattedSrc: function (src,width) {
       var queryStringWidth=this._getQueryStringWidth(width);
-      if (queryStringWidth)return this.__queryStringFormatSrcWidth(src, queryStringWidth);
+      if (queryStringWidth)return this._queryStringFormatSrcWidth(src, queryStringWidth);
       else return src;
     },
 
@@ -439,8 +440,8 @@
      * @param src {string}
      * @private
      */
-    _setSrc: function (src) {
-      src = this._getQueryStringFormattedSrc(src);
+    _setSrc: function (src,width) {
+      src = this._getQueryStringFormattedSrc(src,width);
       this.$.contentImage.setAttribute('src', src);
     },
 

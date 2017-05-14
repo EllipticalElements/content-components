@@ -78,12 +78,15 @@
   };
 
   Elliptical.ContentBehavior._contentReady=function(){
+    this.classList.remove('component-hide');
+    this.classList.remove('component-preload');
     var selector=this.placeholderSelector;
     var placeholder=document.querySelector(selector);
     if(placeholder) this._isEditMode= placeholder.classList.contains('edit-mode');
     this._utils=elliptical.utils;
     this._setJsonModel();
     this._setDefaultJsonModel();
+    this._fireReadyEvent();
   };
 
   Elliptical.ContentBehavior.showComponent=function(){
@@ -94,6 +97,18 @@
   Elliptical.ContentBehavior.hideComponent=function(){
     this._isEditMode=false;
     this._onContentComponentHide();
+  };
+
+  Elliptical.ContentBehavior._fireReadyEvent=function(){
+     var id;
+     if(this.id) id=this.id;
+     else if(this.dataset.id) id=this.dataset.id;
+     var data={
+       id:id,
+       target:this,
+       tagName:this.tagName
+     };
+     this.fire('content-component-ready',data);
   };
 
   Elliptical.ContentBehavior._onEditClick=function(){};
@@ -124,7 +139,7 @@
     var self=this;
     var templateId=this.templatePath;
     if(!templateId){
-      console.warn('WARNING: content element template property required...');
+      console.warn('WARNING: template property required...');
       return;
     }
     if(!items) return;
