@@ -1,0 +1,89 @@
+
+<link rel="import" href="content-behavior.html">
+
+<dom-module id="content-span">
+  <style>
+    :host {
+      position: relative;
+    }
+
+    :host span{
+      border:var(--content-header-outline, 2px dashed transparent);
+      margin-left:  var(--content-header-margin-left, -6px);
+    }
+
+    :host.active span {
+      border: var(--content-header-outline-active, 2px dashed #dadada);
+    }
+
+    :host.active span:focus {
+      outline: none !important;
+      border: var(--content-header-outline-focus, 2px dashed #9E9E9E);
+    }
+    :host.hidden {
+      opacity:0;
+      transition: all 0.25s linear;
+    }
+  </style>
+  <template>
+    <span id="contentSpan">
+      <content></content>
+    </span>
+  </template>
+</dom-module>
+<script>
+
+  Polymer({
+
+    is: 'content-span',
+
+    behaviors: [Elliptical.ComponentBehavior, Elliptical.ContentBehavior],
+
+    properties: {
+      cssClass:{
+        type:String,
+        value:null
+      }
+
+    },
+
+    listeners: {},
+
+    ready: function () {
+      this._contentReady();
+      if(this.cssClass){
+        this.$.contentSpan.classList.add(this.cssClass);
+      }
+      if (this._isEditMode) this._setContentEditable();
+    },
+
+    _setContentEditable: function () {
+      this.classList.add('active');
+      this.$.contentSpan.setAttribute('contenteditable', true);
+    },
+
+    _resetContentEditable:function(){
+      this.classList.remove('active');
+      this.$.contentSpan.removeAttribute('contenteditable');
+    },
+
+    _onContentComponentShow: function () {
+      this._setContentEditable();
+    },
+
+    _onContentComponentHide: function () {
+      this._resetContentEditable();
+    },
+
+    _onContentComponentSet:function(content){
+      if(content) this.$.contentSpan.innerHTML=content;
+      this.classList.remove('hidden');
+    },
+
+    getContent:function(){
+      return this.$.contentSpan.innerHTML;
+    }
+
+  });
+
+</script>
